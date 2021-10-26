@@ -2,6 +2,7 @@
 #include <windows.h>
 #include "Renderer.h"
 #include <memory>
+#include <optional>
 
 class Window
 {
@@ -16,7 +17,8 @@ class Window
 		~WindowClass();
 		WindowClass(const WindowClass&) = delete;
 		WindowClass& operator=(const WindowClass&) = delete;
-		static constexpr const char* wndClassName = "Engine";
+
+		static constexpr const char* wndClassName = "DirectX Shooter";
 		static WindowClass wndClass;
 		HINSTANCE hInst;
 	};
@@ -26,6 +28,8 @@ public:
 	~Window();
 	Window(const Window&) = delete;
 	Window& operator = (const Window&) = delete;
+
+	static std::optional<int> ProcessMessage();
 
 	Renderer& Gfx();
 

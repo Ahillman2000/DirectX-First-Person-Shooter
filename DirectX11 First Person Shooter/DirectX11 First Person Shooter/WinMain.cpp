@@ -13,5 +13,5 @@ int CALLBACK  WinMain(
 	LPSTR     lpCmdLine,
 	int       nCmdShow)
 {
-	return Application{}.Go();
+	return Application{}.Run();
 }

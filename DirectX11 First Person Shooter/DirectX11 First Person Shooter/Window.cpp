@@ -1,4 +1,6 @@
 #include "Window.h"
+// #inlude <string>
+// #inlclude <sstream>
 
 Window::WindowClass Window::WindowClass::wndClass;
 
@@ -49,12 +51,13 @@ Window::Window(int width, int height, const char* name) noexcept
 	AdjustWindowRect(&wr,WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE);
 
 	hWnd = CreateWindow(
-		WindowClass::GetName(), name,
+		WindowClass::GetName(), 
+		name,
 		WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
 		CW_USEDEFAULT, CW_USEDEFAULT, wr.right - wr.left, wr.bottom - wr.top,
 		nullptr, nullptr, WindowClass::GetInstance(), this);
 
-	ShowWindow(hWnd, SW_SHOW);
+	ShowWindow(hWnd, SW_SHOWDEFAULT);
 
 	pGfx = std::make_unique<Renderer>(hWnd);
 }
@@ -69,10 +72,15 @@ Renderer& Window::Gfx()
 	return *pGfx;
 }
 
-LRESULT WINAPI Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	if (msg == WM_NCCREATE)
+	switch (msg)
 	{
+	case WM_CLOSE:
+		PostQuitMessage(0);
+		break;
+
+	case WM_NCCREATE:
 		const CREATESTRUCTW* const pCreate = reinterpret_cast<CREATESTRUCTW*>(lParam);
 		Window* const pWnd = static_cast<Window*>(pCreate->lpCreateParams);
 
@@ -80,11 +88,19 @@ LRESULT WINAPI Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&Window::HandleMsgThunk));
 
 		return pWnd->HandleMsg(hWnd, msg, wParam, lParam);
+		break;
+
+	/*case WM_CHAR:
+		break;
+
+	case WM_LBUTTONDOWN:
+		break;*/
 	}
+
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-LRESULT WINAPI Window::HandleMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK Window::HandleMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	Window* const pWnd = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 	return pWnd->HandleMsg(hWnd, msg, wParam, lParam);
@@ -94,9 +110,29 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 {
 	switch (msg)
 	{
-	case WM_CLOSE:
-		PostQuitMessage(0);
-		return 0;
+		case WM_CLOSE | WM_DESTROY:
+		{
+			PostQuitMessage(0);
+			return 0;
+		}break;
 	}
 	return DefWindowProc(hWnd, msg, wParam, lParam); 
+}
+
+std::optional<int> Window::ProcessMessage()
+{
+	MSG msg;
+	
+	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+	{
+		if (msg.message == WM_QUIT)
+		{
+			return msg.wParam;
+		}
+
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	return {};
 }

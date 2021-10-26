@@ -1,15 +1,18 @@
 #pragma once
 #include "Window.h"
+#include "windows.h"
+#include "Time.h"
 
 class Application
 {
 public:
 	Application();
-	int Go();
+	int Run();
 
 private:
 	void DoFrame();
 
 	Window wnd;
+	Time timer;
 };
 

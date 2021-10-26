@@ -4,25 +4,27 @@
 
 Renderer::Renderer(HWND hWnd)
 {
-	DXGI_SWAP_CHAIN_DESC sd = {};
+	DXGI_SWAP_CHAIN_DESC scd = {};
 
-	sd.BufferDesc.Width = 0;
-	sd.BufferDesc.Height = 0;
-	sd.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	sd.BufferDesc.RefreshRate.Numerator = 0;
-	sd.BufferDesc.RefreshRate.Denominator = 0;
-	sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-	sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
 
-	sd.SampleDesc.Count = 1;
-	sd.SampleDesc.Quality = 0;
+	scd.BufferDesc.Width = 0;
+	scd.BufferDesc.Height = 0;
+	scd.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	scd.BufferDesc.RefreshRate.Numerator = 0;
+	scd.BufferDesc.RefreshRate.Denominator = 0;
+	scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 
-	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sd.BufferCount = 1;
-	sd.OutputWindow = hWnd;
-	sd.Windowed = TRUE;
-	sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	sd.Flags = 0;
+	scd.SampleDesc.Count = 1;
+	scd.SampleDesc.Quality = 0;
+
+	scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	scd.BufferCount = 1;
+	scd.OutputWindow = hWnd;
+	scd.Windowed = TRUE;
+	scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+	scd.Flags = 0;
 
 	D3D11CreateDeviceAndSwapChain
 	(
@@ -33,31 +35,53 @@ Renderer::Renderer(HWND hWnd)
 		nullptr,
 		0,
 		D3D11_SDK_VERSION,
-		&sd,
-		&pSwap,
-		&pDevice,
+		&scd,
+		&swapChain,
+		&d3ddev,
 		nullptr,
-		&pContext
+		&devcon
 	);
+
+	ID3D11Resource* pBackBuffer = nullptr;
+
+	swapChain->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void**>(&pBackBuffer));
+	
+	d3ddev->CreateRenderTargetView(
+		pBackBuffer,
+		nullptr,
+		&backbuffer
+	);
+
+	pBackBuffer->Release();
 }
 
 Renderer::~Renderer()
 {
-	if (pDevice != nullptr)
+	if (backbuffer != nullptr)
 	{
-		pContext->Release();
+		backbuffer->Release();
 	}
-	if (pSwap != nullptr)
+	if (d3ddev != nullptr)
 	{
-		pSwap->Release();
+		devcon->Release();
 	}
-	if (pDevice != nullptr)
+	if (swapChain != nullptr)
 	{
-		pDevice->Release();
+		swapChain->Release();
+	}
+	if (d3ddev != nullptr)
+	{
+		d3ddev->Release();
 	}
 }
 
-void Renderer::EndFrame()
+void Renderer::RenderFrame()
 {
-	//pSwap->Present(1u, 0u);
+	swapChain->Present(1u, 0u);
+}
+
+void Renderer::ClearBuffer(float red, float green, float blue)
+{
+	const float colour[] = { red, green, blue, 1.0f };
+	devcon->ClearRenderTargetView(backbuffer, colour);
 }

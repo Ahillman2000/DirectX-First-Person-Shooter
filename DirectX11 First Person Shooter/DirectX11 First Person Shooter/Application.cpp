@@ -1,37 +1,30 @@
 #include "Application.h"
 
+int SCREEN_WIDTH  = 800;
+int SCREEN_HEIGHT = 600;
+
 Application::Application()
 	:
-	wnd(800, 600, "DirectX11 First Person Shooter")
+	wnd(SCREEN_WIDTH, SCREEN_HEIGHT, "DirectX11 First Person Shooter")
 {}
 
-int Application::Go()
+int Application::Run()
 {
-	MSG msg;
-
-	BOOL gResult;
-
-	while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0)
+	while (true)
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-
+		if (const auto ecode = Window::ProcessMessage())
+		{
+			return *ecode;
+		}
 		DoFrame();
 	}
-
-	if (gResult == -1)
-	{
-		return -1;
-	}
-	else
-	{
-		return msg.wParam;
-	}
-
-	//return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
 void Application::DoFrame()
 {
-	wnd.Gfx().EndFrame();
+	const float c = sin(timer.Peek()) / 2.0f + 0.5f;
+
+	//wnd.Gfx().ClearBuffer(27.0f, 127.0f, 227.0f);
+	wnd.Gfx().ClearBuffer(c, c, 1.0f);
+	wnd.Gfx().RenderFrame();
 }
