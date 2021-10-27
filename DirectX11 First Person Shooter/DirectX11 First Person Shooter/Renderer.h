@@ -13,7 +13,7 @@ public:
 	void RenderFrame();
 	void ClearBuffer(float red, float green, float blue);
 
-	void DrawTestTriangle();
+	void DrawTestTriangle(float angle);
 
 private:
 	Microsoft::WRL::ComPtr <IDXGISwapChain>         swapChain;
