@@ -1,6 +1,9 @@
 #include "Renderer.h"
+#include <d3dcompiler.h>
+#include <sstream>
 
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "D3DCompiler.lib")
 
 Renderer::Renderer(HWND hWnd)
 {
@@ -42,37 +45,17 @@ Renderer::Renderer(HWND hWnd)
 		&devcon
 	);
 
-	ID3D11Resource* pBackBuffer = nullptr;
+	Microsoft::WRL::ComPtr<ID3D11Resource> pBackBuffer;
 
-	swapChain->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void**>(&pBackBuffer));
+	swapChain->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer);
 	
 	d3ddev->CreateRenderTargetView(
-		pBackBuffer,
+		pBackBuffer.Get(),
 		nullptr,
 		&backbuffer
 	);
 
 	pBackBuffer->Release();
-}
-
-Renderer::~Renderer()
-{
-	if (backbuffer != nullptr)
-	{
-		backbuffer->Release();
-	}
-	if (d3ddev != nullptr)
-	{
-		devcon->Release();
-	}
-	if (swapChain != nullptr)
-	{
-		swapChain->Release();
-	}
-	if (d3ddev != nullptr)
-	{
-		d3ddev->Release();
-	}
 }
 
 void Renderer::RenderFrame()
@@ -82,6 +65,80 @@ void Renderer::RenderFrame()
 
 void Renderer::ClearBuffer(float red, float green, float blue)
 {
-	const float colour[] = { red, green, blue, 1.0f };
-	devcon->ClearRenderTargetView(backbuffer, colour);
+	const float colour[] = { red / 255.0f, green / 255.0f, blue / 255.0f, 1.0f };
+	devcon->ClearRenderTargetView(backbuffer.Get(), colour);
+}
+
+void Renderer::DrawTestTriangle()
+{
+	struct Vertex
+	{
+		float x;
+		float y;
+	};
+
+	const Vertex vertices[]
+	{
+		{ 0.0f,  0.5f},
+		{ 0.5f, -0.5f},
+		{-0.5f, -0.5f},
+	};
+
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
+	D3D11_BUFFER_DESC bdsc = {};
+	bdsc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bdsc.Usage = D3D11_USAGE_DEFAULT;
+	bdsc.CPUAccessFlags = 0u;
+	bdsc.MiscFlags = 0u;
+	bdsc.ByteWidth = sizeof(vertices);
+	bdsc.StructureByteStride = sizeof(Vertex);
+
+	D3D11_SUBRESOURCE_DATA srd = {};
+	srd.pSysMem = vertices;
+
+	d3ddev->CreateBuffer(&bdsc, &srd, &pVertexBuffer);
+	const UINT stride = sizeof(Vertex);
+	const UINT offset = 0u;
+
+	devcon->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
+
+	Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
+
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader;
+	D3DReadFileToBlob(L"PixelShader.cso", &pBlob);
+	d3ddev->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
+	devcon->PSSetShader(pPixelShader.Get(), nullptr, 0);
+
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader;
+	D3DReadFileToBlob(L"VertexShader.cso", &pBlob);
+	d3ddev->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader);
+	devcon->VSSetShader(pVertexShader.Get(), nullptr, 0);
+
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> pInputLayout;
+	const D3D11_INPUT_ELEMENT_DESC ied[] =
+	{
+		{"Position", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}
+	};
+
+	d3ddev->CreateInputLayout(
+		ied,
+		(UINT)std::size(ied),
+		pBlob->GetBufferPointer(),
+		pBlob->GetBufferSize(),
+		&pInputLayout);
+
+	devcon->IASetInputLayout(pInputLayout.Get());
+	devcon->OMSetRenderTargets(1, backbuffer.GetAddressOf(), nullptr);
+	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	D3D11_VIEWPORT vp;
+	vp.Width = 800;
+	vp.Height = 600;
+	vp.MinDepth = 0;
+	vp.MaxDepth = 1;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	devcon->RSSetViewports(1, &vp);
+
+	devcon->Draw((UINT)std::size(vertices), 0u);
 }

@@ -15,4 +15,3 @@ private:
 	Window wnd;
 	Time timer;
 };
-
