@@ -2,6 +2,7 @@
 #include "Windows.h"
 #include <d3d11.h>
 #include <wrl.h>
+#include "Settings.h"
 
 class Renderer
 {
@@ -14,6 +15,8 @@ public:
 	void ClearBuffer(float red, float green, float blue);
 
 	void Draw(float angle, float x_pos, float y_pos, float z_pos);
+
+	Settings settings;
 
 private:
 	Microsoft::WRL::ComPtr <IDXGISwapChain>         swapChain;

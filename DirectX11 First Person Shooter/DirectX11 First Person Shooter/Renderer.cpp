@@ -2,6 +2,7 @@
 #include <d3dcompiler.h>
 #include <sstream>
 #include <DirectXMath.h>
+#include "Settings.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "D3DCompiler.lib")
@@ -67,8 +68,8 @@ Renderer::Renderer(HWND hWnd)
 
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pDepthStencil;
 	D3D11_TEXTURE2D_DESC descDepth = {};
-	descDepth.Width  = 800;
-	descDepth.Height = 600;
+	descDepth.Width  = settings.SCREEN_WIDTH;
+	descDepth.Height = settings.SCREEN_HEIGHT;
 	descDepth.MipLevels = 1;
 	descDepth.ArraySize = 1;
 	descDepth.Format = DXGI_FORMAT_D32_FLOAT;
@@ -177,10 +178,12 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 			DirectX::XMMatrixTranspose(
 				DirectX::XMMatrixRotationZ(angle) *
 				DirectX::XMMatrixRotationX(angle) *
-				DirectX::XMMatrixTranslation(x_pos, y_pos, z_pos) *
-				DirectX::XMMatrixPerspectiveFovLH(1.0f, 0.75f, 0.5f, 10.0f))
+				DirectX::XMMatrixTranslation(x_pos, y_pos, z_pos + 4.0f) *
+				DirectX::XMMatrixPerspectiveLH(1.0f, 0.75f, 0.5f, 10.0f))
 		}
 	};
+
+	DirectX::XMMATRIX worldView = DirectX::XMMatrixIdentity();
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
 	D3D11_BUFFER_DESC cbd;
@@ -261,8 +264,8 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	D3D11_VIEWPORT vp;
-	vp.Width = 800;
-	vp.Height = 600;
+	vp.Width   = settings.SCREEN_WIDTH;
+	vp.Height   = settings.SCREEN_HEIGHT;
 	vp.MinDepth = 0;
 	vp.MaxDepth = 1;
 	vp.TopLeftX = 0;

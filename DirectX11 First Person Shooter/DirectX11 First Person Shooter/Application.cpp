@@ -1,11 +1,10 @@
 #include "Application.h"
-
-int SCREEN_WIDTH  = 800;
-int SCREEN_HEIGHT = 600;
+#include "Settings.h"
+#include <fstream>
 
 Application::Application()
 	:
-	wnd(SCREEN_WIDTH, SCREEN_HEIGHT, "DirectX11 First Person Shooter")
+	wnd(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, "DirectX11 First Person Shooter")
 {}
 
 int Application::Run()
@@ -24,9 +23,36 @@ void Application::Update()
 {
 	const float c = sin(timer.Peek()) / 2.0f + 0.5f;
 
-	wnd.Gfx().ClearBuffer(255.0f, 255.0f, 255.0f);
+	wnd.Gfx().ClearBuffer(0.0f, 0.0f, 0.0f);
 
-	wnd.Gfx().Draw(timer.Peek(), 0, 0.5, 5);
-	wnd.Gfx().Draw(0, 0, 0.5, 4.5 + c);
+	//wnd.Gfx().Draw(timer.Peek(), 0, 0.5, 5);
+	//wnd.Gfx().Draw(0, 0, 0.5, 4.5 + c);
+
+	std::fstream level;
+	level.open("Level.txt");
+
+	char wallChar = '#';
+	char endline = 'e';
+
+	int line    = 0;
+	int coloumn = 0;
+
+	while(!level.eof())
+	{
+		line++;
+
+		if (line == 10)
+		{
+			coloumn++;
+			line = 0;
+		}
+
+		if (level.get() == wallChar)
+		{
+			wnd.Gfx().Draw(0.0f, line - 5, coloumn - 2, 5);
+		}
+	}
+	level.close();
+
 	wnd.Gfx().RenderFrame();
 }
