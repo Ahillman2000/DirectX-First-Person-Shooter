@@ -16,16 +16,17 @@ int Application::Run()
 		{
 			return *ecode;
 		}
-		DoFrame();
+		Update();
 	}
 }
 
-void Application::DoFrame()
+void Application::Update()
 {
 	const float c = sin(timer.Peek()) / 2.0f + 0.5f;
-	//wnd.Gfx().ClearBuffer(c, c, 1.0f);
 
-	wnd.Gfx().ClearBuffer(0.0f, 0.0f, 0.0f);
-	wnd.Gfx().DrawTestTriangle(timer.Peek());
+	wnd.Gfx().ClearBuffer(255.0f, 255.0f, 255.0f);
+
+	wnd.Gfx().Draw(timer.Peek(), 0, 0.5, 5);
+	wnd.Gfx().Draw(0, 0, 0.5, 4.5 + c);
 	wnd.Gfx().RenderFrame();
 }

@@ -13,11 +13,12 @@ public:
 	void RenderFrame();
 	void ClearBuffer(float red, float green, float blue);
 
-	void DrawTestTriangle(float angle);
+	void Draw(float angle, float x_pos, float y_pos, float z_pos);
 
 private:
 	Microsoft::WRL::ComPtr <IDXGISwapChain>         swapChain;
 	Microsoft::WRL::ComPtr <ID3D11Device>           d3ddev;
 	Microsoft::WRL::ComPtr <ID3D11DeviceContext>    devcon;
 	Microsoft::WRL::ComPtr <ID3D11RenderTargetView> backbuffer;
+	Microsoft::WRL::ComPtr <ID3D11DepthStencilView> DSV;
 };

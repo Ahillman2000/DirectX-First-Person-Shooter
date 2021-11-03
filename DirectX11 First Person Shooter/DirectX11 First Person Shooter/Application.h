@@ -10,7 +10,7 @@ public:
 	int Run();
 
 private:
-	void DoFrame();
+	void Update();
 
 	Window wnd;
 	Time timer;
