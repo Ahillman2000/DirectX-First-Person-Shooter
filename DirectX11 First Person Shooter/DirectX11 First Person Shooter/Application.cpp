@@ -41,7 +41,7 @@ void Application::Update()
 	{
 		line++;
 
-		if (line == 10)
+		if (/*level.get() == endline*/ line == 6)
 		{
 			coloumn++;
 			line = 0;
@@ -49,7 +49,7 @@ void Application::Update()
 
 		if (level.get() == wallChar)
 		{
-			wnd.Gfx().Draw(0.0f, line - 5, coloumn - 2, 5);
+			wnd.Gfx().Draw((line * 2) - 5, (coloumn * 2) - 3, 5);
 		}
 	}
 	level.close();

@@ -101,7 +101,7 @@ void Renderer::ClearBuffer(float red, float green, float blue)
 	devcon->ClearDepthStencilView(DSV.Get(), D3D11_CLEAR_DEPTH, 1, 0);
 }
 
-void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
+void Renderer::Draw(float x_pos, float y_pos, float z_pos)
 {
 	struct Vertex
 	{
@@ -176,8 +176,8 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 	{
 		{
 			DirectX::XMMatrixTranspose(
-				DirectX::XMMatrixRotationZ(angle) *
-				DirectX::XMMatrixRotationX(angle) *
+				//DirectX::XMMatrixRotationZ(angle) *
+				//DirectX::XMMatrixRotationX(angle) *
 				DirectX::XMMatrixTranslation(x_pos, y_pos, z_pos + 4.0f) *
 				DirectX::XMMatrixPerspectiveLH(1.0f, 0.75f, 0.5f, 10.0f))
 		}

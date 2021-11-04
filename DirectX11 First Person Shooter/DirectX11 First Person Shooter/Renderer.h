@@ -14,7 +14,7 @@ public:
 	void RenderFrame();
 	void ClearBuffer(float red, float green, float blue);
 
-	void Draw(float angle, float x_pos, float y_pos, float z_pos);
+	void Draw(float x_pos, float y_pos, float z_pos);
 
 	Settings settings;
 
