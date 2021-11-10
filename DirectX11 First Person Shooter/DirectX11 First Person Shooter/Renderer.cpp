@@ -9,6 +9,7 @@
 
 Renderer::Renderer(HWND hWnd)
 {
+	// SWAPCHAIN
 	DXGI_SWAP_CHAIN_DESC scd = {};
 
 	ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
@@ -172,6 +173,9 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 		DirectX::XMMATRIX transform;
 	};
 
+	DirectX::XMMATRIX worldView = DirectX::XMMatrixIdentity();
+
+
 	const ConstantBuffer cb =
 	{
 		{
@@ -179,11 +183,11 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 				DirectX::XMMatrixRotationZ(angle) *
 				DirectX::XMMatrixRotationX(angle) *
 				DirectX::XMMatrixTranslation(x_pos, y_pos, z_pos + 4.0f) *
+				GetCamera()*
+				GetProjection() *
 				DirectX::XMMatrixPerspectiveLH(1.0f, 0.75f, 0.5f, 10.0f))
 		}
 	};
-
-	DirectX::XMMATRIX worldView = DirectX::XMMatrixIdentity();
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
 	D3D11_BUFFER_DESC cbd;
@@ -221,6 +225,7 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 			{0.0f, 1.0f, 1.0f},
 		}
 	};
+
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer2;
 	D3D11_BUFFER_DESC cbd2;
 	cbd2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -274,4 +279,24 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 
 	//devcon->DrawIndexed((UINT)std::size(vertices), 0u);
 	devcon->DrawIndexed((UINT)std::size(indices), 0, 0);
+}
+
+void Renderer::SetProjection(DirectX::FXMMATRIX proj) noexcept
+{
+	projection = proj;
+}
+
+DirectX::XMMATRIX Renderer::GetProjection() const noexcept
+{
+	return projection;
+}
+
+void Renderer::SetCamera(DirectX::FXMMATRIX cam) noexcept
+{
+	camera = cam;
+}
+
+DirectX::XMMATRIX Renderer::GetCamera() const noexcept
+{
+	return camera;
 }

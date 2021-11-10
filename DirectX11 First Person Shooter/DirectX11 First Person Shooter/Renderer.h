@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <wrl.h>
 #include "Settings.h"
+#include "Camera.h"
 
 class Renderer
 {
@@ -16,6 +17,11 @@ public:
 
 	void Draw(float angle, float x_pos, float y_pos, float z_pos);
 
+	void SetProjection(DirectX::FXMMATRIX proj) noexcept;
+	DirectX::XMMATRIX GetProjection() const noexcept;
+	void SetCamera(DirectX::FXMMATRIX cam) noexcept;
+	DirectX::XMMATRIX GetCamera() const noexcept;
+
 	Settings settings;
 
 private:
@@ -24,4 +30,7 @@ private:
 	Microsoft::WRL::ComPtr <ID3D11DeviceContext>    devcon;
 	Microsoft::WRL::ComPtr <ID3D11RenderTargetView> backbuffer;
 	Microsoft::WRL::ComPtr <ID3D11DepthStencilView> DSV;
+
+	DirectX::XMMATRIX projection;
+	DirectX::XMMATRIX camera;
 };

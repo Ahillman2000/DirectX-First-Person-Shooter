@@ -2,7 +2,7 @@
 class Settings
 {
 public:
-	int SCREEN_WIDTH  = 800;
-	int SCREEN_HEIGHT = 600;
+	float SCREEN_WIDTH  = 800;
+	float SCREEN_HEIGHT = 600;
 };
 

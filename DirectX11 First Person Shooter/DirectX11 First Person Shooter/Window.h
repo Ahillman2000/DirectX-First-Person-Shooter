@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include <memory>
 #include <optional>
+#include "Keyboard.h"
 
 class Window
 {
@@ -32,6 +33,9 @@ public:
 	static std::optional<int> ProcessMessage();
 
 	Renderer& Gfx();
+
+	Keyboard keyboard;
+	void Update();
 
 private:
 	static LRESULT CALLBACK HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

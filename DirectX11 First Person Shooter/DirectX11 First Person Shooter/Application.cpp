@@ -5,7 +5,9 @@
 Application::Application()
 	:
 	wnd(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, "DirectX11 First Person Shooter")
-{}
+{
+	wnd.Gfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f / 16.0f, 0.5f, 40.0f));
+}
 
 int Application::Run()
 {
@@ -14,19 +16,65 @@ int Application::Run()
 		if (const auto ecode = Window::ProcessMessage())
 		{
 			return *ecode;
+			
 		}
+
+		wnd.Update();
 		Update();
 	}
 }
 
 void Application::Update()
 {
-	const float c = sin(timer.Peek()) / 2.0f + 0.5f;
-
 	wnd.Gfx().ClearBuffer(0.0f, 0.0f, 0.0f);
 
-	//wnd.Gfx().Draw(timer.Peek(), 0, 0.5, 5);
-	//wnd.Gfx().Draw(0, 0, 0.5, 4.5 + c);
+	wnd.Gfx().SetCamera(camera.GetMatrix());
+
+	if (wnd.keyboard.KeyIsPressed('W'))
+	{
+		camera.Translate({ 0.0f,0.0f,timer.Mark() });
+	}
+	if (wnd.keyboard.KeyIsPressed('A'))
+	{
+		camera.Translate({ -timer.Mark(),0.0f,0.0f });
+	}
+	if (wnd.keyboard.KeyIsPressed('S'))
+	{
+		camera.Translate({ 0.0f,0.0f,-timer.Mark() });
+	}
+	if (wnd.keyboard.KeyIsPressed('D'))
+	{
+		camera.Translate({ timer.Mark(),0.0f,0.0f });
+	}
+
+	if (wnd.keyboard.KeyIsPressed('R'))
+	{
+		camera.Translate({ 0.0f,timer.Mark(),0.0f });
+	}
+	if (wnd.keyboard.KeyIsPressed('F'))
+	{
+		camera.Translate({ 0.0f,-timer.Mark(),0.0f });
+	}
+
+	/*while (!wnd.keyboard.charBufferIsEmpty())
+	{
+		unsigned char ch = keyboard.ReadChar();
+		std::string outmsg = "char: ";
+		outmsg += ch;
+		outmsg += "\n";
+		OutputDebugStringA(outmsg.c_str());
+	}
+
+	while (!wnd.keyboard.KeyBufferIsEmpty())
+	{
+		KeyboardEvent keyboardevent = keyboard.ReadKey();
+
+		unsigned char keycode = keyboardevent.GetKeyCode();
+		std::string outmsg = "keycode: ";
+		outmsg += keycode;
+		outmsg += "\n";
+		OutputDebugStringA(outmsg.c_str());
+	}*/
 
 	std::fstream level;
 	level.open("Level.txt");
@@ -34,14 +82,14 @@ void Application::Update()
 	char wallChar = '#';
 	char endline = 'e';
 
-	int line    = 0;
+	int line = 0;
 	int coloumn = 0;
 
-	while(!level.eof())
+	while (!level.eof())
 	{
 		line++;
 
-		if (line == 10)
+		if (level.peek() == endline)
 		{
 			coloumn++;
 			line = 0;
@@ -49,10 +97,15 @@ void Application::Update()
 
 		if (level.get() == wallChar)
 		{
-			wnd.Gfx().Draw(0.0f, line - 5, coloumn - 2, 5);
+			wnd.Gfx().Draw(0.0f, (line * block_spacing) + map_x_offset, (coloumn * block_spacing) + map_y_offset, 5);
 		}
 	}
 	level.close();
+
+	const float c = sin(timer.Peek()) / 2.0f + 0.5f;
+
+	//wnd.Gfx().Draw(timer.Peek(), 0, 0.5, 5);
+	//wnd.Gfx().Draw(0, 0, 0.5, 4.5 + c);
 
 	wnd.Gfx().RenderFrame();
 }
