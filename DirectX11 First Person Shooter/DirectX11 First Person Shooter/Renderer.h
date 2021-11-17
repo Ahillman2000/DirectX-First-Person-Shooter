@@ -4,6 +4,9 @@
 #include <wrl.h>
 #include "Settings.h"
 #include "Camera.h"
+#include "IndexBuffer.h"
+#include "VertexBuffer.h"
+#include "Vertex.h"
 
 class Renderer
 {
@@ -33,4 +36,7 @@ private:
 
 	DirectX::XMMATRIX projection;
 	DirectX::XMMATRIX camera;
+
+	IndexBuffer  indexBuffer;
+	VertexBuffer vertexBuffer;
 };

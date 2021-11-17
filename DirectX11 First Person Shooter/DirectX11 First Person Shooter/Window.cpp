@@ -127,7 +127,8 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 		case WM_CHAR:
 			keyboard.OnChar(static_cast<unsigned char>(wParam));
 			break;
-			*/
+		*/
+
 		case WM_KEYDOWN:
 		{
 			unsigned char keycode = static_cast<unsigned char>(wParam);

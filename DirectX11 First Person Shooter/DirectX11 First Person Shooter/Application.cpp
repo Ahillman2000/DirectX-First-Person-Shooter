@@ -30,31 +30,7 @@ void Application::Update()
 
 	wnd.Gfx().SetCamera(camera.GetMatrix());
 
-	if (wnd.keyboard.KeyIsPressed('W'))
-	{
-		camera.Translate({ 0.0f,0.0f,timer.Mark() });
-	}
-	if (wnd.keyboard.KeyIsPressed('A'))
-	{
-		camera.Translate({ -timer.Mark(),0.0f,0.0f });
-	}
-	if (wnd.keyboard.KeyIsPressed('S'))
-	{
-		camera.Translate({ 0.0f,0.0f,-timer.Mark() });
-	}
-	if (wnd.keyboard.KeyIsPressed('D'))
-	{
-		camera.Translate({ timer.Mark(),0.0f,0.0f });
-	}
-
-	if (wnd.keyboard.KeyIsPressed('R'))
-	{
-		camera.Translate({ 0.0f,timer.Mark(),0.0f });
-	}
-	if (wnd.keyboard.KeyIsPressed('F'))
-	{
-		camera.Translate({ 0.0f,-timer.Mark(),0.0f });
-	}
+	MoveCamera();
 
 	/*while (!wnd.keyboard.charBufferIsEmpty())
 	{
@@ -76,11 +52,52 @@ void Application::Update()
 		OutputDebugStringA(outmsg.c_str());
 	}*/
 
+	GenerateLevel();
+
+	const float c = sin(timer.Peek()) / 2.0f + 0.5f;
+
+	//wnd.Gfx().Draw(timer.Peek(), 0, 0.5, 5);
+	//wnd.Gfx().Draw(0, 0, 0.5, 4.5 + c);
+
+	wnd.Gfx().RenderFrame();
+}
+
+void Application::MoveCamera()
+{
+	if (wnd.keyboard.KeyIsPressed('W'))
+	{
+		camera.Translate({ 0.0f,0.0f,timer.Mark() });
+	}
+	if (wnd.keyboard.KeyIsPressed('S'))
+	{
+		camera.Translate({ 0.0f,0.0f,-timer.Mark() });
+	}
+	if (wnd.keyboard.KeyIsPressed('A'))
+	{
+		camera.Rotate(-timer.Mark(), 0.0f);
+	}
+	if (wnd.keyboard.KeyIsPressed('D'))
+	{
+		camera.Rotate(timer.Mark(), 0.0f);
+	}
+
+	/*if (wnd.keyboard.KeyIsPressed('R'))
+	{
+		camera.Translate({ 0.0f,timer.Mark(),0.0f });
+	}
+	if (wnd.keyboard.KeyIsPressed('F'))
+	{
+		camera.Translate({ 0.0f,-timer.Mark(),0.0f });
+	}*/
+}
+
+void Application::GenerateLevel()
+{
 	std::fstream level;
 	level.open("Level.txt");
 
 	char wallChar = '#';
-	char endline = 'e';
+	char endline = '\n';
 
 	int line = 0;
 	int coloumn = 0;
@@ -97,15 +114,10 @@ void Application::Update()
 
 		if (level.get() == wallChar)
 		{
-			wnd.Gfx().Draw(0.0f, (line * block_spacing) + map_x_offset, (coloumn * block_spacing) + map_y_offset, 5);
+			// 0 rotation, x, y ,z = 5
+			//wnd.Gfx().Draw(0.0f, (line * block_spacing) + map_x_offset, (coloumn * block_spacing) + map_y_offset, 5);
+			wnd.Gfx().Draw(0.0f, (line * block_spacing) + map_x_offset, 0, (coloumn * block_spacing) + map_z_offset);
 		}
 	}
 	level.close();
-
-	const float c = sin(timer.Peek()) / 2.0f + 0.5f;
-
-	//wnd.Gfx().Draw(timer.Peek(), 0, 0.5, 5);
-	//wnd.Gfx().Draw(0, 0, 0.5, 4.5 + c);
-
-	wnd.Gfx().RenderFrame();
 }

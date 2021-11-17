@@ -104,46 +104,19 @@ void Renderer::ClearBuffer(float red, float green, float blue)
 
 void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 {
-	struct Vertex
+	std::vector<Vertex> vertices =
 	{
-		struct 
-		{
-			float x;
-			float y;
-			float z;
-		} pos;
-	};
-
-	Vertex vertices[]
-	{
-	    //x      y      z
 		{-1.0f, -1.0f, -1.0f},
-		{ 1.0f, -1.0f, -1.0f},
-		{-1.0f,  1.0f, -1.0f},
-		{ 1.0f,  1.0f, -1.0f},
-		{-1.0f, -1.0f,  1.0f},
-		{ 1.0f, -1.0f,  1.0f},
-		{-1.0f,  1.0f,  1.0f},
-		{ 1.0f,  1.0f,  1.0f},
+		{ 1.0f, -1.0f, -1.0f },
+		{ -1.0f,  1.0f, -1.0f },
+		{ 1.0f,  1.0f, -1.0f },
+		{ -1.0f, -1.0f,  1.0f },
+		{ 1.0f, -1.0f,  1.0f },
+		{ -1.0f,  1.0f,  1.0f },
+		{ 1.0f,  1.0f,  1.0f },
 	};
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
-	D3D11_BUFFER_DESC bdsc = {};
-	bdsc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bdsc.Usage = D3D11_USAGE_DEFAULT;
-	bdsc.CPUAccessFlags = 0u;
-	bdsc.MiscFlags = 0u;
-	bdsc.ByteWidth = sizeof(vertices);
-	bdsc.StructureByteStride = sizeof(Vertex);
-
-	D3D11_SUBRESOURCE_DATA srd = {};
-	srd.pSysMem = vertices;
-
-	d3ddev->CreateBuffer(&bdsc, &srd, &pVertexBuffer);
-	const UINT stride = sizeof(Vertex);
-	const UINT offset = 0u;
-
-	const unsigned short indices[] =
+	const std::vector<unsigned short> indices =
 	{
 		0, 2, 1,  2, 3, 1,
 		1, 3, 5,  3, 7, 5,
@@ -153,28 +126,19 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 		0, 1, 4,  1, 5, 4
 	};
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
-	D3D11_BUFFER_DESC  ibd = {  };
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.Usage = D3D11_USAGE_DEFAULT;
-	ibd.CPUAccessFlags = 0u;
-	ibd.MiscFlags = 0u;
-	ibd.ByteWidth = sizeof(indices);
-	ibd.StructureByteStride = sizeof(unsigned short);
+	vertexBuffer.Init(d3ddev.Get(), vertices);
+	vertexBuffer.Bind(devcon.Get());
 
-	D3D11_SUBRESOURCE_DATA isd = {};
-	isd.pSysMem = indices;
-	d3ddev->CreateBuffer(&ibd, &isd, &pIndexBuffer);
-	devcon->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
-	devcon->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
+	indexBuffer.Init(d3ddev.Get(), indices);
+	indexBuffer.Bind(devcon.Get());
 
+	// constant buffer class
 	struct ConstantBuffer
 	{
 		DirectX::XMMATRIX transform;
 	};
 
 	DirectX::XMMATRIX worldView = DirectX::XMMatrixIdentity();
-
 
 	const ConstantBuffer cb =
 	{
@@ -238,7 +202,9 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 	csd2.pSysMem = &cb2;
 	d3ddev->CreateBuffer(&cbd2, &csd2, &pConstantBuffer2);
 	devcon->PSSetConstantBuffers(0, 1, pConstantBuffer2.GetAddressOf());
-	
+	//
+
+	// shader class
 	Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
 
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader;
@@ -269,7 +235,7 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	D3D11_VIEWPORT vp;
-	vp.Width   = settings.SCREEN_WIDTH;
+	vp.Width    = settings.SCREEN_WIDTH;
 	vp.Height   = settings.SCREEN_HEIGHT;
 	vp.MinDepth = 0;
 	vp.MaxDepth = 1;

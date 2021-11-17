@@ -5,7 +5,6 @@
 class Keyboard
 {
 	friend class Window;
-
 public:
 	Keyboard();
 

@@ -16,6 +16,10 @@ public:
 private:
 	void Update();
 
+	void MoveCamera();
+
+	void GenerateLevel();
+
 	Window wnd;
 	Time timer;
 
@@ -23,6 +27,6 @@ private:
 	Keyboard keyboard;
 
 	float block_spacing = 2;
-	float map_x_offset = -7;
-	float map_y_offset = -6; 
+	float map_x_offset = -8;
+	float map_z_offset = -10; 
 };

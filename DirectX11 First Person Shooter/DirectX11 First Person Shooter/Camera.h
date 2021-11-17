@@ -73,7 +73,7 @@ private:
 	float pitch;
 	float yaw;
 	static constexpr float camTranslationSpeed = 10.0f;
-	static constexpr float camRotationSpeed    =  0.004f;
+	static constexpr float camRotationSpeed    =  1.0f;
 
 	const DirectX::XMVECTOR DEFAULT_FORWARD_VECTOR = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 	const DirectX::XMVECTOR DEFAULT_UP_VECTOR = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
