@@ -58,6 +58,7 @@ Renderer::Renderer(HWND hWnd)
 		&backbuffer
 	);
 
+	// DEPTH STENCIL
 	D3D11_DEPTH_STENCIL_DESC dsDesc = {};
 	dsDesc.DepthEnable = TRUE;
 	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
@@ -126,13 +127,15 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 		0, 1, 4,  1, 5, 4
 	};
 
+	// CREATE AND BIND VERTEX BUFFER
 	vertexBuffer.Init(d3ddev.Get(), vertices);
 	vertexBuffer.Bind(devcon.Get());
 
+	// CREATE AND BIND INDEX BUFFER
 	indexBuffer.Init(d3ddev.Get(), indices);
 	indexBuffer.Bind(devcon.Get());
 
-	// constant buffer class
+	// CONSTANT BUFFER
 	struct ConstantBuffer
 	{
 		DirectX::XMMATRIX transform;
@@ -153,7 +156,8 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 		}
 	};
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
+	// VERTEX CONSTANT BUFFER
+	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexConstantBuffer;
 	D3D11_BUFFER_DESC cbd;
 	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbd.Usage = D3D11_USAGE_DYNAMIC;
@@ -163,9 +167,9 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 	cbd.StructureByteStride = 0u;
 	D3D11_SUBRESOURCE_DATA csd = {};
 	csd.pSysMem = &cb;
-	d3ddev->CreateBuffer(&cbd, &csd, &pConstantBuffer);
+	d3ddev->CreateBuffer(&cbd, &csd, &vertexConstantBuffer);
 	
-	devcon->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
+	devcon->VSSetConstantBuffers(0, 1, vertexConstantBuffer.GetAddressOf());
 
 	struct ConstantBuffer2
 	{
@@ -190,7 +194,8 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 		}
 	};
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer2;
+	// INDEX CONSTANT BUFFER
+	Microsoft::WRL::ComPtr<ID3D11Buffer> indexConstantBuffer;
 	D3D11_BUFFER_DESC cbd2;
 	cbd2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbd2.Usage = D3D11_USAGE_DEFAULT;
@@ -200,11 +205,10 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 	cbd2.StructureByteStride = 0u;
 	D3D11_SUBRESOURCE_DATA csd2 = {};
 	csd2.pSysMem = &cb2;
-	d3ddev->CreateBuffer(&cbd2, &csd2, &pConstantBuffer2);
-	devcon->PSSetConstantBuffers(0, 1, pConstantBuffer2.GetAddressOf());
-	//
+	d3ddev->CreateBuffer(&cbd2, &csd2, &indexConstantBuffer);
+	devcon->PSSetConstantBuffers(0, 1, indexConstantBuffer.GetAddressOf()); 
 
-	// shader class
+	// SHADERS
 	Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
 
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader;
@@ -247,6 +251,7 @@ void Renderer::Draw(float angle, float x_pos, float y_pos, float z_pos)
 	devcon->DrawIndexed((UINT)std::size(indices), 0, 0);
 }
 
+// CAMERA RELATED STUFF
 void Renderer::SetProjection(DirectX::FXMMATRIX proj) noexcept
 {
 	projection = proj;
